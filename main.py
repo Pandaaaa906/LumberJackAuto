@@ -87,7 +87,7 @@ async def _main(url):
 
 
 if __name__ == '__main__':
+    url = input("Input your game link: ")
     loop = asyncio.get_event_loop()
     while True:
-        url = input("Input your game link: ")
         loop.run_until_complete(_main(url))
