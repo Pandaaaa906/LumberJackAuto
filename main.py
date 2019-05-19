@@ -87,8 +87,7 @@ async def _main(url):
 
 
 if __name__ == '__main__':
-    url = "https://tbot.xyz/lumber/#eyJ1Ijo3MTgyMjI2NDIsIm4iOiJQYW5kYWFhYSBZaXAiLCJnIjoiTHVtYmVySmFjayIsImNpIjoiLTI0MDI5MTYyMTk1MTA3NTc5OTUiLCJpIjoiQlFBQUFNaklBUUFtbERLN3NXU19Ra3l1TWJvIn0xNzEwMmM4NzQ3YmIwYzQzMDdkZTE0YmNhNGM3NzkzYw==&tgShareScoreUrl=tg%3A%2F%2Fshare_game_score%3Fhash%3D_MPgn1QCmICtyYbxbIteLdDhQz48QWyZKcS6lElUgkc"
     loop = asyncio.get_event_loop()
     while True:
-        # url = input("Input your game link: ")
+        url = input("Input your game link: ")
         loop.run_until_complete(_main(url))
