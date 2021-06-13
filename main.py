@@ -76,14 +76,14 @@ async def async_play(url: str):
 
     await page.waitFor('.in_game')
     logger.info("Playing...")
-    count = 0
+    # count = 0
     while await page.querySelectorAll('.in_game'):
-        count += 1
+        # count += 1
         b_data = await page.screenshot(clip=box)
         img = Image.open(BytesIO(b_data))
         arr = np.array(img)
         l_count, r_count = nearest_branch(arr, l_indexes), nearest_branch(arr, r_indexes)
-        draw_detect_point(img, tmp_img_fp.format(count))
+        # draw_detect_point(img, tmp_img_fp.format(count))
         if l_count > r_count:
             for _ in range(l_count - 1):
                 await btn_left.click()
