@@ -18,12 +18,19 @@ tmp_img_fp = "screenshots/tmp_{}.png"
 
 threshold = 50
 
-l_indexes = ([242, 192, 142, 92, 42], [0, ] * 5)
-r_indexes = ([242, 192, 142, 92, 42], [59, ] * 5)
+N_LOOK_AHEAD = 5
+X_LEFT_BRANCH = 0
+X_RIGHT_BRANCH = 59
+Y_START = 42
+Y_GAP = 50
+Y_INDEXES = tuple(reversed(tuple(Y_START + Y_GAP * i for i in range(N_LOOK_AHEAD))))
+
+l_indexes = (Y_INDEXES, [X_LEFT_BRANCH, ] * N_LOOK_AHEAD)
+r_indexes = (Y_INDEXES, [X_RIGHT_BRANCH, ] * N_LOOK_AHEAD)
 
 
-def func(arr):
-    return first(np.where(arr == False)[0], len(arr))
+def nearest_branch(arr, indexes):
+    return first(np.where((norm(arr[indexes] - branch_color, axis=1) > threshold) == False)[0], N_LOOK_AHEAD)
 
 
 def draw_detect_point(img, fp):
@@ -38,13 +45,12 @@ def crop_box(box: dict) -> dict:
     mid = width / 2
     x = mid - 30
     width = 60
-    result = {
+    return {
         'x': x,
         'y': y,
         'width': width,
         'height': 245,
     }
-    return result
 
 
 async def _main(url: str):
@@ -55,8 +61,7 @@ async def _main(url: str):
     await btn_start.click()
 
     content = await page.waitForXPath('//div[@class="page_content"]')
-    box = await content.boundingBox()
-    box = crop_box(box)
+    box = crop_box(await content.boundingBox())
 
     btn_left = await page.waitForXPath('//div[@id="button_left"]')
     btn_right = await page.waitForXPath('//div[@id="button_right"]')
@@ -69,8 +74,7 @@ async def _main(url: str):
 
         arr = np.array(img)
 
-        l_count = func(norm(arr[l_indexes] - branch_color, axis=1) - threshold > 0)
-        r_count = func(norm(arr[r_indexes] - branch_color, axis=1) - threshold > 0)
+        l_count, r_count = nearest_branch(arr, l_indexes), nearest_branch(arr, r_indexes)
 
         # draw_detect_point(img, tmp_img_fp.format(count))
 
