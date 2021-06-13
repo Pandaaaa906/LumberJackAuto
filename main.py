@@ -6,6 +6,8 @@ from PIL import Image
 from PIL.ImageDraw import Draw
 
 import numpy as np
+from loguru import logger
+from more_itertools import first
 from numpy.linalg import norm
 
 from browser import new_browser_page
@@ -21,10 +23,7 @@ r_indexes = ([242, 192, 142, 92, 42], [59, ] * 5)
 
 
 def func(arr):
-    for i, value in enumerate(arr):
-        if not value:
-            break
-    return i
+    return first(np.where(arr == False)[0], len(arr))
 
 
 def draw_detect_point(img, fp):
@@ -48,7 +47,7 @@ def crop_box(box: dict) -> dict:
     return result
 
 
-async def _main(url):
+async def _main(url: str):
     page = await new_browser_page(headless=True)
 
     await page.goto(url)
@@ -63,7 +62,7 @@ async def _main(url):
     btn_right = await page.waitForXPath('//div[@id="button_right"]')
 
     await page.waitFor('.in_game')
-    print("Playing...")
+    logger.info("Playing...")
     while await page.querySelectorAll('.in_game'):
         b_data = await page.screenshot(clip=box)
         img = Image.open(BytesIO(b_data))
@@ -81,13 +80,14 @@ async def _main(url):
         else:
             for _ in range(r_count - 1):
                 await btn_right.click()
-    score = await (await (await page.waitForXPath('//div[@id="score_value"]/text()')).getProperty("textContent")).jsonValue()
-    print(f"Your Score This Time: {score}")
+    score = await (
+        await (await page.waitForXPath('//div[@id="score_value"]/text()')).getProperty("textContent")).jsonValue()
+    logger.info(f"Your Score This Time: {score}")
     await page.browser.close()
 
 
 if __name__ == '__main__':
-    url = input("Input your game link: ")
-    loop = asyncio.get_event_loop()
+    url = "https://tbot.xyz/lumber/#eyJ1Ijo3MTgyMjI2NDIsIm4iOiJQYW5kYWFhYSBZaXAiLCJnIjoiTHVtYmVySmFjayIsImNpIjoiNzg1NTYxMTg0NDEzMzgyNzgyOCIsImkiOiJCUUFBQUJnUUV3RGxQRTNCR3oyVkgzRnNGU1EifWFiODNlOTZjMmI2NjAzYWVkNjlkZTBkNDdjMTQyZGI5?tgShareScoreUrl=tgb%3A%2F%2Fshare_game_score%3Fhash%3DxrwtNOUxByeJDXVIyEou"
+    # url = input("Input your game link: ")
     while True:
-        loop.run_until_complete(_main(url))
+        asyncio.run(_main(url))
